@@ -23,7 +23,7 @@ exports.registrarUsuarios = async (req, res) => {
             error: error.message
         });
     }
-}
+} 
 
 exports.iniciarSesion = async (req, res) => {
     //datos recibidos desde el cliente
