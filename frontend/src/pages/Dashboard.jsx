@@ -17,6 +17,9 @@ export const Dashboard = () => {
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevoEstado, setNuevoEstado] = useState("");
 
+  // =====filtro estado =====
+  const [filtroEstado, setFiltroEstado] = useState('')
+
   // ===== AUTH =====
   const token = localStorage.getItem("token");
   const decode = jwtDecode(token);
@@ -26,9 +29,10 @@ export const Dashboard = () => {
   const mostrarTareas = async () => {
     try {
       const res = await axios.get(`${API_URL}/auth/mostrarTareas`);
-      setMostrarTasks(res.data.tareas);
+      setMostrarTasks(res.data.tareas || [])
     } catch (error) {
       console.log("Error al mostrar las tareas");
+      setMostrarTasks([]);
     }
   };
 
@@ -36,14 +40,15 @@ export const Dashboard = () => {
     if (!nombreTarea || !estado) return;
 
     try {
-      await axios.post(`${API_URL}/auth/crearTarea`, {
+      const res = await axios.post(`${API_URL}/auth/crearTarea`, {
         nombre_tarea: nombreTarea,
         estado,
       });
 
+      setMostrarTasks(tareaVieja => [...tareaVieja, res.data.tarea])
+
       setNombreTarea("");
       setEstado("");
-      mostrarTareas();
     } catch (error) {
       console.log("Error al crear la tarea");
     }
@@ -52,13 +57,12 @@ export const Dashboard = () => {
   const eliminarTarea = async (id) => {
     try {
       await axios.delete(`${API_URL}/auth/eliminarTarea/${id}`);
-      mostrarTareas();
+      setMostrarTasks(prev => prev.filter(task => task.id !== id));
     } catch (error) {
       console.log("Error al eliminar la tarea");
     }
   };
 
-  // ===== MODAL LOGIC =====
   const abrirModal = (task) => {
     setModalEditando(task);
     setNuevoNombre(task.nombre_tarea);
@@ -75,6 +79,15 @@ export const Dashboard = () => {
         }
       );
 
+      setMostrarTasks(prev => prev.map(tarea => 
+        tarea.id === modalEditando.id 
+        ? {...tarea,
+          Nuevo_nombre_tarea: nuevoNombre,
+          nuevo_estado: nuevoEstado
+        }
+        : tarea
+      ))
+
       setModalOpen(false);
       setModalEditando(null);
       mostrarTareas();
@@ -82,6 +95,10 @@ export const Dashboard = () => {
       console.log("Error al modificar la tarea");
     }
   };
+
+  const tareasFiltradas = filtroEstado
+    ? mostrarTasks.filter(task => task.estado === filtroEstado)
+    : mostrarTasks;
 
   useEffect(() => {
     mostrarTareas();
@@ -125,7 +142,7 @@ export const Dashboard = () => {
 
                   <div className="space-y-2 relative">
                     <div className="relative w-full bg-[#d1d1d1] rounded-sm flex items-center h-\[48px]">
-                      
+
                       <select
                         className="w-full bg-transparent border-none h-full py-3 text-gray-700 focus:outline-none cursor-pointer pl-1"
                         value={estado}
@@ -135,7 +152,7 @@ export const Dashboard = () => {
                           Estado
                         </option>
                         {opciones.map((opt) => (
-                          <option key={opt}>{opt}</option>
+                          <option key={opt} value={opt}>{opt}</option>
                         ))}
                       </select>
                     </div>
@@ -158,15 +175,30 @@ export const Dashboard = () => {
           <div className="w-full md:w-[55%] bg-[#fcfcfc] p-8 md:p-16 flex flex-col">
             <div className="w-full max-w-3xl mx-auto h-full flex flex-col items-center">
               <h2 className="text-3xl text-black mb-10">Mis tareas</h2>
+              <div className="w-full max-w-[200px] self-start ml-8 md:ml-0">
+                <label className="block text-sm text-gray-600 mb-1 pl-1">Filtro de busqueda</label>
+                <div className="relative w-full bg-[#e0e0e0] rounded-sm flex items-center h-10">
 
-              {mostrarTasks.length === 0 ? (
+                  <select className="w-full bg-transparent border-none h-full text-gray-700 focus:outline-none cursor-pointer pl-2"
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}>
+                    <option value="">Todas</option>
+                    {opciones.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+
+              {tareasFiltradas.length === 0 ? (
                 <p className="text-gray-600">No hay tareas creadas</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8 w-full px-8 md:px-0">
-                  {mostrarTasks.map((task) => (
+                  {tareasFiltradas.map((task) => (
                     <div
                       key={task.id}
-                      className="bg-[#e0e0e0] p-6 py-8 flex flex-col items-center justify-center gap-4 shadow-none min-w-[200px]"
+                      className="bg-[#e0e0e0] p-6 py-8 flex flex-col items-center justify-center gap-4 shadow-none min-w-[200px] mt-7"
                     >
                       <div className="text-center space-y-1 mb-2">
                         <h3 className="text-gray-800 font-medium">
@@ -216,7 +248,7 @@ export const Dashboard = () => {
                   onChange={(e) => setNuevoEstado(e.target.value)}
                 >
                   {opciones.map((op) => (
-                    <option key={op}>{op}</option>
+                    <option key={op} value={op}>{op}</option>
                   ))}
                 </select>
 

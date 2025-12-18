@@ -116,9 +116,9 @@ exports.mostrarTareas = async (req, res) => {
         const response = await db.query('SELECT * FROM tareas');
         //condicion si no hay tareas creadas
         if (response.rows.length === 0) {
-            return res.status(400).json({
-                msg: 'No hay tareas creadas'
-            })
+            return {
+                msg: "no hay tareas creadas"
+            }
         }
         res.status(200).json({
             msg: 'Tareas solicitadas con exito',
