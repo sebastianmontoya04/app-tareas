@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const pool = new Pool({
-    connectionString: process.env.DB_URL
+    connectionString: process.env.NODE_ENV === "production"
+        ? process.env.DATABASE_URL  // en Railway
+        : process.env.DB_URL,       // en local
+    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
 });
 
 // Probar la conexión
