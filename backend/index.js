@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors({
-    origin: 'https://task-manager-sebas.netlify.app/' //url de el front
+    origin: 'https://task-manager-sebas.netlify.app' //url de el front
 }));
 app.use(express.json());
 
