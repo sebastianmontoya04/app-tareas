@@ -1,7 +1,7 @@
 import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL } from "../api";
+import API_URL from "../api";
 import { jwtDecode } from "jwt-decode";
 import { replace, useNavigate } from "react-router-dom";
 

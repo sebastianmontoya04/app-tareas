@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
 import { useState } from "react";
-import { API_URL } from '../api'
+import API_URL from '../api'
 import Swal from 'sweetalert2'
 
 export const Login = () => {
