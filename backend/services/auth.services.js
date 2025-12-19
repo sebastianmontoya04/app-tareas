@@ -7,9 +7,24 @@ exports.registrarUsuarios = async (req, res) => {
     //datos enviados desde el front
     const { nombre_usuario, password } = req.body
     try {
+        if (!nombre_usuario || !password) {
+            return res.status(400).json({
+                msg: 'los campos no pueden estar vacios'
+            })
+        }
+        if (nombre_usuario.length < 5) {
+            return res.status(404).json({
+                msg: 'El nombre de usuario debe tener al menos 5 letras'
+            })
+        }
+        // if (typeof nombre_usuario !== 'String' || nombre_usuario.trim() === '') {
+        //     res.status(403).json({
+        //         msg: 'El nombre de usuario debe tener solamente letras'
+        //     })
+        // }
         //encripta la password antes de guardar
         const hashearPassword = await bcrypt.hash(password, 10)
-        //consulta a la base de datos
+        //inserta a la base de datos
         const response = await db.query('INSERT INTO usuarios (nombre_usuarios, password) values ($1, $2) RETURNING *',
             [nombre_usuario, hashearPassword]
         );
@@ -23,26 +38,37 @@ exports.registrarUsuarios = async (req, res) => {
             error: error.message
         });
     }
-} 
+}
 
 exports.iniciarSesion = async (req, res) => {
     //datos recibidos desde el cliente
     const { nombre_usuario, password } = req.body
     try {
+        if (!nombre_usuario || !password) {
+            res.status(400).json({
+                msg: 'los campos no pueden estar vacios'
+            })
+        }
+        if (nombre_usuario.length < 5) {
+            res.status(402).json({
+                msg: 'El nombre de usuario debe tener al menos 5 letras'
+            })
+        }
+        // if (typeof nombre_usuario !== 'String' || nombre_usuario.trim() === '') {
+        //     res.status(401).json({
+        //         msg: 'El nombre de usuario debe tener solamente letras'
+        //     })
+        // }
+
         const response = await db.query('SELECT * FROM usuarios WHERE nombre_usuarios = $1',
             [nombre_usuario]
         )
-        if (response.rows.length === 0) {
-            return res.status(400).json({
-                msg: 'Usuario no encontrado'
-            });
-        };
         //guardamos el usuario en user
         const user = response.rows[0];
         //validamos si la contraseña es igual
         const compararPassword = await bcrypt.compare(password, user.password);
         if (!compararPassword) {
-            return res.status(400).json({ msg: 'Contraseña incorrecta ' });
+            return res.status(401).json({ msg: 'Contraseña incorrecta ' });
         };
         const token = jwt.sign({
             nombre_usuario: user.nombre_usuarios
@@ -53,7 +79,7 @@ exports.iniciarSesion = async (req, res) => {
         res.status(200).json({ msg: 'Inicio de sesion exitoso', token })
 
     } catch (error) {
-        res.status(400).json({ msg: 'Error al iniciar sesion', error })
+        res.status(403).json({ msg: 'Verifica tus credenciales ', error })
     }
 }
 

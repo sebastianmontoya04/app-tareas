@@ -14,23 +14,57 @@ export const Login = () => {
 
     try {
       const response = await axios.post(`${API_URL}/auth/login`, {
-        nombre_usuario,
-        password
+        nombre_usuario: nombre_usuario.trim(),
+        password: password.trim()
       });
+
       localStorage.setItem("token", response.data.token);
 
-      if (!response.data.token) return console.log("Token requerido")
       Swal.fire({
         icon: 'success',
         title: '¡Inicio de sesión exitoso!',
-        showConfirmButton: true
-      })
-      navigate('/Dashboard')
+      });
+
+      navigate('/Dashboard');
 
     } catch (error) {
-      console.log('Error al iniciar sesion', error)
+      const status = error.response?.status;
+      const message = error.response?.data?.msg
+
+      if (status === 400) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al iniciar sesión',
+          text: message
+        });
+      } else if (status === 401) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al iniciar sesión',
+          text: message
+        });
+      } else if (status === 402) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al iniciar sesión',
+          text: message
+        });
+      } else if (status === 403) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al iniciar sesión',
+          text: message
+        });
+      } else if (status === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al iniciar sesión',
+          text: message
+        });
+      }
     }
-  }
+  };
+
 
   return <>
     <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">

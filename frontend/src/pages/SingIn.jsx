@@ -1,6 +1,56 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
+import { API_URL } from '../api'
+import Swal from 'sweetalert2'
 
 export const SingIn = () => {
+  const [nombreUsuario, setNombreUsuario] = useState('')
+  const [contraseña, setContraseña] = useState('')
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}/auth/registrar`, {
+        nombre_usuario: nombreUsuario,
+        password: contraseña
+      })
+      Swal.fire({
+        icon: 'success',
+        title: 'Usuario registrado correctamente'
+      });
+      setNombreUsuario('')
+      setContraseña('')
+    } catch (error) {
+      const status = error.response?.status;
+      const msg = error.response?.data?.msg;
+
+      if (status === 200) {
+        Swal.fire({
+          icon: 'success',
+          text: msg
+        });
+      } else if (status === 400) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: msg
+        });
+      } else if (status === 403) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: msg
+        });
+      } else if (status === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: msg
+        });
+      }
+    }
+  }
 
   return <>
     <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">
@@ -26,7 +76,7 @@ export const SingIn = () => {
             Registrarse
           </h2>
 
-          <form className="space-y-8" >
+          <form className="space-y-8" onSubmit={handleRegister} >
             <div className="space-y-3">
               <label className="text-gray-700 text-sm font-medium ml-1">
                 Nombre de usuario
@@ -37,6 +87,8 @@ export const SingIn = () => {
                   className="w-full bg-[#eeeeee] text-gray-900 pl-5 pr-4 py-3.5 rounded-xl border-none focus:ring-2 focus:ring-[#5887d4]/50 focus:outline-none transition-all shadow-[0_2px_5px_rgba(0,0,0,0.05)]"
                   data-testid="input-username"
                   placeholder='Ingresa tu nombre de usuario'
+                  value={nombreUsuario}
+                  onChange={(e) => setNombreUsuario(e.target.value)}
                 />
               </div>
             </div>
@@ -51,6 +103,8 @@ export const SingIn = () => {
                   className="w-full bg-[#eeeeee] text-gray-900 pl-5 pr-4 py-3.5 rounded-xl border-none focus:ring-2 focus:ring-[#5887d4]/50 focus:outline-none transition-all shadow-[0_2px_5px_rgba(0,0,0,0.05)]"
                   data-testid="input-password"
                   placeholder='Ingresa tu contraseña'
+                  value={contraseña}
+                  onChange={(e) => setContraseña(e.target.value)}
                 />
               </div>
             </div>
