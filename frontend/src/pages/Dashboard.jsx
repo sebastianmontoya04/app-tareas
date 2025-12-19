@@ -197,7 +197,7 @@ export const Dashboard = () => {
           {/* Right Panel */}
           <div className="w-full md:w-[55%] bg-[#fcfcfc] p-8 md:p-16 flex flex-col">
             <div className="w-full max-w-3xl mx-auto h-full flex flex-col items-center">
-              <img src="./public/logout.png" alt="Imagen de cerrar sesion" className="w-6 cursor-pointer absolute top-7 right-9"
+              <img src="/logout.png" alt="Imagen de cerrar sesion" className="w-6 cursor-pointer absolute top-7 right-9"
                 onClick={handleLogout} />
               <h2 className="text-3xl text-black mb-10">Mis tareas</h2>
               <div className="w-full max-w-[200px] self-start ml-8 md:ml-0">
