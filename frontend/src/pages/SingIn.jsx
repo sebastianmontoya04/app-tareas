@@ -11,7 +11,7 @@ export const SingIn = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/auth/registrar`, {
+      await axios.post(`https://app-tareas-production.up.railway.app/api/auth/registrar`, {
         nombre_usuario: nombreUsuario,
         password: contraseña
       })
