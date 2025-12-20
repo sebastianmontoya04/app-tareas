@@ -31,7 +31,7 @@ export const Dashboard = () => {
   // ===== CRUD =====
   const mostrarTareas = async () => {
     try {
-      const res = await axios.get(`${API_URL}/auth/mostrarTareas`);
+      const res = await axios.get(`https://app-tareas-production.up.railway.app/api/auth/mostrarTareas`);
       //guardamos las tareas en el estado de mostrarTask
       setMostrarTasks(res.data.tareas || [])
     } catch (error) {
@@ -46,7 +46,7 @@ export const Dashboard = () => {
 
     try {
       //llamamos el endpoint de el backend que espera recibir nombre de la tarea y el estado
-      const res = await axios.post(`${API_URL}/auth/crearTarea`, {
+      const res = await axios.post(`https://app-tareas-production.up.railway.app/api/auth/crearTarea`, {
         //aqui enviamos el nombre de la tarea y el estado
         nombre_tarea: nombreTarea,
         estado,
@@ -64,7 +64,7 @@ export const Dashboard = () => {
   const eliminarTarea = async (id) => {
     try {
       //solicitamos el endpoint de el backend
-      await axios.delete(`${API_URL}/auth/eliminarTarea/${id}`);
+      await axios.delete(`https://app-tareas-production.up.railway.app/api/auth/eliminarTarea/${id}`);
 
       //cambiamos el estado de las tareas, con el metodo filter prev trae las tareas viejas despues filter recorre todas las tareas y solo deja me retorna las tareas difrentes al id de la tarea que quiero eliminar
       setMostrarTasks(prev => prev.filter(task => task.id !== id));
@@ -87,7 +87,7 @@ export const Dashboard = () => {
   const modificarTarea = async () => {
     try {
       //solicitamos el endpoint y sacamos el id de la tarea desde modal editando que ya trae todas las tareas
-      await axios.put(`${API_URL}/auth/actualizarTarea/${modalEditando.id}`,
+      await axios.put(`https://app-tareas-production.up.railway.app/api/auth/actualizarTarea/${modalEditando.id}`,
         //enviamos la nueva tarea con su estado 
         {
           nombre_tarea: nuevoNombre,
