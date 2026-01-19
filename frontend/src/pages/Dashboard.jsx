@@ -3,7 +3,18 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../api";
 import { jwtDecode } from "jwt-decode";
-import { replace, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import * as React from "react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -201,18 +212,22 @@ export const Dashboard = () => {
                 onClick={handleLogout} />
               <h2 className="text-3xl text-black mb-10">Mis tareas</h2>
               <div className="w-full max-w-[200px] self-start ml-8 md:ml-0">
-                <label className="block text-sm text-gray-600 mb-1 pl-1">Filtro de busqueda</label>
-                <div className="relative w-full bg-[#e0e0e0] rounded-sm flex items-center h-10">
-
-                  <select className="w-full bg-transparent border-none h-full text-gray-700 focus:outline-none cursor-pointer pl-2"
+                  <Select
                     value={filtroEstado}
                     onChange={(e) => setFiltroEstado(e.target.value)}>
-                    <option value="">Todas</option>
-                    {opciones.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filtro de estados" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Estados</SelectLabel>
+                        {opciones.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
               </div>
 
 

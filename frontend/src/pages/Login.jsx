@@ -3,65 +3,37 @@ import axios from 'axios'
 import { useState } from "react";
 import API_URL from '../api';
 import Swal from 'sweetalert2'
-  
+
 export const Login = () => {
   const navigate = useNavigate();
-  const [nombre_usuario, setNombre_usuario] = useState([]);
-  const [password, setPassword] = useState([]);
+  const [nombre_usuario, setNombre_usuario] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (!nombre_usuario.trim() || !password.trim()) {
+      Swal.fire('Error', 'Todos los campos son obligatorios', 'error');
+      return;
+    }
+
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const { data } = await axios.post(`${API_URL}/auth/login`, {
         nombre_usuario: nombre_usuario.trim(),
-        password: password.trim()
+        password: password.trim(),
       });
 
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", data.token);
 
-      Swal.fire({
-        icon: 'success',
-        title: '¡Inicio de sesión exitoso!',
-      });
-
+      Swal.fire('Éxito', 'Inicio de sesión exitoso', 'success');
       navigate('/Dashboard');
 
     } catch (error) {
-      const status = error.response?.status;
-      const message = error.response?.data?.msg
-
-      if (status === 400) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: message
-        });
-      } else if (status === 401) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: message
-        });
-      } else if (status === 402) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: message
-        });
-      } else if (status === 403) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: message
-        });
-      } else if (status === 404) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: message
-        });
-      }
+      Swal.fire(
+        'Error',
+        error.response?.data?.msg || 'Error al iniciar sesión',
+        'error'
+      );
     }
   };
 
