@@ -1,4 +1,3 @@
-import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../api";
@@ -6,14 +5,26 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import * as React from "react"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Card,
+  CardHeader
+} from "@/components/ui/card"
 
 
 export const Dashboard = () => {
@@ -91,8 +102,7 @@ export const Dashboard = () => {
     setNuevoNombre(task.nombre_tarea);
     //al estado de el estado de la tarea le pasamos el nuevo estado
     setNuevoEstado(task.estado);
-    //abrimos el modal
-    setModalOpen(true);
+    setModalOpen(true)
   };
 
   const modificarTarea = async () => {
@@ -159,49 +169,48 @@ export const Dashboard = () => {
               </div>
 
               {/* Add Task */}
-              <div className="bg-white rounded-none p-8 mt-12 text-gray-800 max-w-[350px] w-full shadow-none">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-600 pl-1">
-                      Nombre tarea
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ingresa tu tarea"
-                      className="w-full bg-[#d1d1d1] border-none rounded-sm p-3 text-gray-700 placeholder:text-gray-600 focus:outline-none"
-                      value={nombreTarea}
-                      onChange={(e) => setNombreTarea(e.target.value)}
-                    />
-                  </div>
+              <Card className="w-full max-w-sm">
+                <CardHeader>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name-1">Nombre tarea</Label>
+                      <Input
+                        id="name-1"
+                        name="name"
+                        placeholder="Ingresa el nombre de la tarea"
+                        value={nombreTarea}
+                        onChange={(e) => setNombreTarea(e.target.value)} />
+                    </div>
 
-                  <div className="space-y-2 relative">
-                    <div className="relative w-full bg-[#d1d1d1] rounded-sm flex items-center h-\[48px]">
+                    <div className="space-y-2 relative">
+                      <Label htmlFor="username-1">Estado</Label>
+                      {/* <div className="relative w-full bg-[#d1d1d1] rounded-sm flex items-center h-\[48px]"> */}
 
-                      <select
-                        className="w-full bg-transparent border-none h-full py-3 text-gray-700 focus:outline-none cursor-pointer pl-1"
+                      <NativeSelect
                         value={estado}
                         onChange={(e) => setEstado(e.target.value)}
                       >
-                        <option value="" disabled>
-                          Estado
-                        </option>
-                        {opciones.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
+                        {opciones.map(opt => (
+                          <NativeSelectOption key={opt} value={opt}>
+                            {opt}
+                          </NativeSelectOption>
                         ))}
-                      </select>
+                      </NativeSelect>
+
+                      {/* </div> */}
+                    </div>
+
+                    <div className="pt-1 flex justify-center">
+                      <button
+                        className="bg-[#7da0eb] hover:bg-[#6b8dd6] text-white px-10 py-2 rounded-md font-medium transition-colors"
+                        onClick={agregarTarea}
+                      >
+                        Agregar
+                      </button>
                     </div>
                   </div>
-
-                  <div className="pt-4 flex justify-center">
-                    <button
-                      className="bg-[#7da0eb] hover:bg-[#6b8dd6] text-white px-10 py-2 rounded-md font-medium transition-colors"
-                      onClick={agregarTarea}
-                    >
-                      Agregar
-                    </button>
-                  </div>
-                </div>
-              </div>
+                </CardHeader>
+              </Card>
             </div>
           </div>
 
@@ -212,34 +221,28 @@ export const Dashboard = () => {
                 onClick={handleLogout} />
               <h2 className="text-3xl text-black mb-10">Mis tareas</h2>
               <div className="w-full max-w-[200px] self-start ml-8 md:ml-0">
-                  <Select
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filtro de estados" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Estados</SelectLabel>
-                        {opciones.map((opt) => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                        ))}
-
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                <option value="" disabled>
+                  Filtro estado
+                </option>
+                <NativeSelect
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}>
+                  <NativeSelectOption value="">Todos</NativeSelectOption>
+                  {opciones.map((opt) => (
+                    <NativeSelectOption key={opt} value={opt}>{opt}</NativeSelectOption>
+                  ))}
+                </NativeSelect>
               </div>
 
 
               {tareasFiltradas.length === 0 ? (
                 <p className="text-gray-600 mt-15 text-2xl">No hay tareas creadas</p>
               ) : (
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8 w-full px-8 md:px-0">
                   {tareasFiltradas.map((task) => (
-                    <div
-                      key={task.id}
-                      className="bg-[#e0e0e0] p-6 py-8 flex flex-col items-center justify-center gap-4 shadow-none min-w-[200px] mt-7"
-                    >
+                    <Card className="w-full max-w-sm mt-5"
+                      key={task.id}>
                       <div className="text-center space-y-1 mb-2">
                         <h3 className="text-gray-800 font-medium">
                           {task.nombre_tarea}
@@ -254,58 +257,66 @@ export const Dashboard = () => {
                         >
                           Eliminar
                         </button>
-                        <button
-                          onClick={() => abrirModal(task)}
-                          className="bg-[#8b8bf0] hover:bg-[#7a7ae0] text-white text-xs px-6 py-2 rounded-sm transition-colors"
-                        >
-                          Modificar
-                        </button>
+                        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              onClick={() => abrirModal(task)}>Modificar</Button>
+                          </DialogTrigger>
+
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Editar tarea</DialogTitle>
+                              <DialogDescription>
+                                Realiza cambios en tu tarea aqui. Haz click en "Guardar" cuando hayas terminado
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4">
+                              <div className="grid gap-3">
+                                <Label htmlFor="name-1">Nombre tarea</Label>
+                                <Input
+                                  id="name-1"
+                                  name="name"
+                                  defaultValue={task.nombre_tarea}
+                                  value={nuevoNombre}
+                                  onChange={(e) => setNuevoNombre(e.target.value)} />
+                              </div>
+                              <div className="grid gap-3">
+                                <Label htmlFor="username-1">Estado</Label>
+                                <NativeSelect
+                                  value={nuevoEstado}
+                                  onChange={(e) => setNuevoEstado(e.target.value)}
+                                >
+                                  {opciones.map(opt => (
+                                    <NativeSelectOption key={opt} value={opt}>
+                                      {opt}
+                                    </NativeSelectOption>
+                                  ))}
+                                </NativeSelect>
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline">Cancelar</Button>
+                              </DialogClose>
+                              <Button
+                                type="submit"
+                                onClick={modificarTarea}>Guardar</Button>
+                            </DialogFooter>
+                          </DialogContent>
+
+                        </Dialog>
                       </div>
-                    </div>
+                    </Card>
                   ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* MODAL */}
-          {modalOpen && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white p-6 w-[300px]">
-                <h3 className="text-lg font-semibold mb-4">
-                  Editar tarea
-                </h3>
-
-                <input
-                  className="w-full bg-gray-200 p-2 mb-3"
-                  value={nuevoNombre}
-                  onChange={(e) => setNuevoNombre(e.target.value)}
-                />
-
-                <select
-                  className="w-full bg-gray-200 p-2 mb-4"
-                  value={nuevoEstado}
-                  onChange={(e) => setNuevoEstado(e.target.value)}
-                >
-                  {opciones.map((op) => (
-                    <option key={op} value={op}>{op}</option>
-                  ))}
-                </select>
-
-                <div className="flex justify-between">
-                  <button onClick={() => setModalOpen(false)} className="bg-[#f08b8b] px-6 py-1">
-                    Cancelar
-                  </button>
-
-                  <button onClick={modificarTarea} className="bg-[#8b8bf0] px-6 py-1" >
-                    Guardar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      </div >
     </>
   );
 };
