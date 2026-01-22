@@ -5,7 +5,7 @@ require('dotenv').config()
 exports.verificarToken = (req, res, next) => {
     const header = req.headers['authorization'];
 
-    if (!header) return res.status(200).json({ msg: 'Token no proporcionado' })
+    if (!header) return res.status(500).json({ msg: 'Token no proporcionado' })
 
     const token = header.split(" ")[1];
 
@@ -14,6 +14,6 @@ exports.verificarToken = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(200).json({ msg: 'Token invalido o expirado' })
+        return res.status(400).json({ msg: 'Token invalido o expirado' })
     }
 };

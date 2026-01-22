@@ -1,187 +1,85 @@
-const db = require('../db/server')
+//nos permite hashear la contraseña
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
+//desectructuramos las funciones de los modelos
+const { registrarUserModels,
+    iniciarSesionModels,
+    crearTareaModels,
+    mostrarTareasModels, actualizarTareasModels,
+    eliminarTareaModels } = require('../models/auth.models')
 
-exports.registrarUsuarios = async (req, res) => {
-    //datos enviados desde el front
-    const { nombre_usuario, password } = req.body
-    try {
-        if (!nombre_usuario || !password) {
-            return res.status(400).json({
-                msg: 'los campos no pueden estar vacios'
-            })
-        }
-        if (nombre_usuario.length < 5) {
-            return res.status(404).json({
-                msg: 'El nombre de usuario debe tener al menos 5 letras'
-            })
-        }
-        // if (typeof nombre_usuario !== 'String' || nombre_usuario.trim() === '') {
-        //     res.status(403).json({
-        //         msg: 'El nombre de usuario debe tener solamente letras'
-        //     })
-        // }
-        //encripta la password antes de guardar
-        const hashearPassword = await bcrypt.hash(password, 10)
-        //inserta a la base de datos
-        const response = await db.query('INSERT INTO usuarios (nombre_usuarios, password) values ($1, $2) RETURNING *',
-            [nombre_usuario, hashearPassword]
-        );
-        res.status(200).json({
-            msg: 'Usuario creado correctamente',
-            usuario: response.rows[0]
-        });
-    } catch (error) {
-        res.status(400).json({
-            msg: 'Error al crear el usuario',
-            error: error.message
-        });
+//funcion para registrar usuarios services que trae desde el frontend el nombre de usuario y la contraseña
+exports.registrarUserServices = async ({ nombre_usuarios, password }) => {
+    //condiciones 
+    if (!nombre_usuarios || !password) {
+        throw new Error('los campos no pueden estar vacios')
     }
-}
-
-exports.iniciarSesion = async (req, res) => {
-    //datos recibidos desde el cliente
-    const { nombre_usuario, password } = req.body
-    try {
-        if (!nombre_usuario || !password) {
-            res.status(400).json({
-                msg: 'los campos no pueden estar vacios'
-            })
-        }
-        if (nombre_usuario.length < 5) {
-            res.status(402).json({
-                msg: 'El nombre de usuario debe tener al menos 5 letras'
-            })
-        }
-        // if (typeof nombre_usuario !== 'String' || nombre_usuario.trim() === '') {
-        //     res.status(401).json({
-        //         msg: 'El nombre de usuario debe tener solamente letras'
-        //     })
-        // }
-
-        const response = await db.query('SELECT * FROM usuarios WHERE nombre_usuarios = $1',
-            [nombre_usuario]
-        )
-        //guardamos el usuario en user
-        const user = response.rows[0];
-        //validamos si la contraseña es igual
-        const compararPassword = await bcrypt.compare(password, user.password);
-        if (!compararPassword) {
-            return res.status(401).json({ msg: 'Contraseña incorrecta ' });
-        };
-        const token = jwt.sign({
-            nombre_usuario: user.nombre_usuarios
-        },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        res.status(200).json({ msg: 'Inicio de sesion exitoso', token })
-
-    } catch (error) {
-        res.status(403).json({ msg: 'Verifica tus credenciales ', error })
+    if (nombre_usuarios.length < 5) {
+        throw new Error('El nombre de usuario debe tener al menos 5 letras')
     }
+    if (password.length < 5) {
+        throw new Error('La contraseña debe tener al menos 5 letras')
+    }
+    //encripta la password antes de guardar
+    const hashearPassword = await bcrypt.hash(password, 10)
+    //a la funcion de registrar usuario models le pasamos como parametro el nombre de usuario y la contraseña hasheada
+    return await registrarUserModels(nombre_usuarios, hashearPassword)
 }
+//funcion para iniciar sesion services que trae desde el frontend el nombre de usuario y la contraseña
+exports.iniciarSesionService = async ({ nombre_usuarios, password }) => {
+    //condiciones 
+    if (!nombre_usuarios || !password) {
+        throw new Error('los campos no pueden estar vacios')
+    }
+    if (nombre_usuarios.length < 5) {
+        throw new Error('El nombre de usuario debe tener al menos 5 letras')
+    }
+    if (password.length < 5) {
+        throw new Error('La contraseña debe tener al menos 5 letras')
+    }
+    //a la funcion de iniciar sesion models le pasamos como parametro el nombre de usuario
+    const user = await iniciarSesionModels(nombre_usuarios)
+    //condicion si ese usuario no existe
+    if (!user) {
+        throw new Error('Usuario no encontrado')
+    }
 
-exports.crearTarea = async (req, res) => {
-    //datos recibidos desde el front
-    const { nombre_tarea, estado } = req.body;
-    try {
-        //consulta a base de datos
-        const response = await db.query('INSERT INTO tareas (nombre_tarea, estado) VALUES ($1, $2) RETURNING *',
-            [nombre_tarea, estado]
-        );
-        //guardamos la tarea en data
-        const data = response.rows[0];
-        //condicional si no hay una tarea
-        if (response.rows.length === 0) {
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
-            });
-        };
-        res.status(200).json({
-            msg: 'Tarea creada exitosamente',
-            tarea: data
-        });
-    } catch (error) {
-        res.status(400).json({ msg: 'Error al crear la tarea', error });
+    //validamos si la contraseña hasheada es igual a la contraseña ingresada por el usuario
+    const compararPassword = await bcrypt.compare(password, user.password);
+    if (!compararPassword) {
+        throw new Error('Contraseña incorrecta ')
     };
+    //mandamos el user
+    return user
+}
+//funcion para crear tarea services que trae desde el frontend el nombre de usuario y el estado
+exports.crearTareaServices = async ({ nombre_tarea, estado }) => {
+    //condicion
+    if (!nombre_tarea || !estado) {
+        throw new Error('Los campos no deben estar vacios')
+    }
+    //a la funcion de crear tarea models le pasamos como parametro el nombre de la tarea y el estado
+    return await crearTareaModels(nombre_tarea, estado)
 };
-
-exports.eliminarTarea = async (req, res) => {
-    //tomamos el id como parametro
-    const { id } = req.params;
-    //consulta a la base de datos
-    try {
-        const response = await db.query('DELETE FROM tareas WHERE id = $1 RETURNING *',
-            [id]
-        );
-        //condicional si no encontramos la tarea
-        if (response.rows.length === 0) {
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
-            });
-        };
-        //guardamos la tarea eliminada en data y se muestra al momento de eliminar
-        const data = response.rows[0];
-        res.status(200).json({
-            msg: 'Tarea eliminada con exito',
-            tarea: data
-        });
-
-    } catch (error) {
-        res.status(400).json({
-            msg: 'Error al eliminar la tarea', error
-        });
-    };
-};
-
-exports.mostrarTareas = async (req, res) => {
-    try {
-        //consulta a la base de datos
-        const response = await db.query('SELECT * FROM tareas');
-        //condicion si no hay tareas creadas
-        if (response.rows.length === 0) {
-            return {
-                msg: "no hay tareas creadas"
-            }
-        }
-        res.status(200).json({
-            msg: 'Tareas solicitadas con exito',
-            tareas: response.rows
-        })
-    } catch (error) {
-        res.status(400).json({
-            msg: 'Error al solicitar las tareas',
-            error
-        })
-    }
+//funcion para mostrar tareas services 
+exports.mostrarTareasServices = async () => {
+    //a la funcion de mostrar tareas models le pasamos las tareas de el frontend
+    return await mostrarTareasModels()
 }
-
-exports.actualizarTarea = async (req, res) => {
-    //tomamos el id como parametro
-    const { id } = req.params;
-    //datos recibidos desde el front
-    const { nombre_tarea, estado } = req.body;
-    try {
-        //consulta a la base de datos
-        const response = await db.query('UPDATE tareas SET nombre_tarea = $2, estado= $3 WHERE id = $1 RETURNING *',
-            [id, nombre_tarea, estado]
-        );
-        //condicion por si deja la tarea vacia
-        if (response.rows.length === 0) {
-            return res.status(400).json({
-                msg: 'Debe asignar una nueva tarea'
-            });
-        };
-        res.status(200).json({
-            msg: 'Tarea actualizada con exito',
-            tarea: response.rows
-        });
-    } catch (error) {
-        res.status(400).json({
-            msg: 'Error al actualizar la tarea',
-            error
-        });
-    };
+//funcion para actualizar tareas services que recibe como parametro el id y recibe el nombre de la tarea y el estado desde el frontend
+exports.actualizarTareaServices = async (id, { nombre_tarea, estado }) => {
+    //condiciones
+    if (!nombre_tarea || !estado || !id) {
+        throw new Error('Tarea no encontrada')
+    }
+    //a la funcion de actualizar tareas models le pasamos el id, nombre de la tarea y el estado
+    return await actualizarTareasModels(id, nombre_tarea, estado)
+};
+//funcion para eliminar tareas services que recibe como parametro el id 
+exports.eliminarTareaService = async (id) => {
+    //condicion
+    if (!id) {
+        throw new Error('Tarea no encontrada')
+    }
+    //a la funcion de eliminar tareas models le pasamos el id
+    return await eliminarTareaModels(id)
 };

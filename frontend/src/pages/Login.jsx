@@ -1,3 +1,4 @@
+//importaciones
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
 import { useState } from "react";
@@ -5,11 +6,15 @@ import API_URL from '../api';
 import Swal from 'sweetalert2'
 
 export const Login = () => {
+  //redireccionamiento
   const navigate = useNavigate();
+  //estado de datos de el usuario
   const [nombre_usuario, setNombre_usuario] = useState("");
   const [password, setPassword] = useState("");
 
+  //funcion que se ejecuta al momento de enviar el formulario
   const handleLogin = async (e) => {
+    //evita que la pagina se recargue
     e.preventDefault();
 
     if (!nombre_usuario.trim() || !password.trim()) {
@@ -18,11 +23,13 @@ export const Login = () => {
     }
 
     try {
+      //llamamos al endpoint de el backend y desesctructuramos data
       const { data } = await axios.post(`${API_URL}/auth/login`, {
-        nombre_usuario: nombre_usuario.trim(),
+        //enviamos los datos esperados de el endpoint, le pasamos el estado de nombre_usuario y password
+        nombre_usuarios: nombre_usuario.trim(),
         password: password.trim(),
       });
-
+      //agregamos el token al localStorage
       localStorage.setItem("token", data.token);
 
       Swal.fire('Éxito', 'Inicio de sesión exitoso', 'success');
@@ -77,7 +84,9 @@ export const Login = () => {
                   className="w-full bg-[#eeeeee] text-gray-900 pl-5 pr-4 py-3.5 rounded-xl border-none focus:ring-2 focus:ring-[#5887d4]/50 focus:outline-none transition-all shadow-[0_2px_5px_rgba(0,0,0,0.05)]"
                   data-testid="input-username"
                   placeholder="Ingresa tu nombre de usuario"
+                  //al input de nombre usuario le ponemos el estado nombre_usuario por defecto
                   value={nombre_usuario}
+                  //al estado de nombre usuario le pasamos lo que el usuario escriba en el input
                   onChange={(e) => setNombre_usuario(e.target.value)}
                 />
               </div>
@@ -93,7 +102,9 @@ export const Login = () => {
                   className="w-full bg-[#eeeeee] text-gray-900 pl-5 pr-4 py-3.5 rounded-xl border-none focus:ring-2 focus:ring-[#5887d4]/50 focus:outline-none transition-all shadow-[0_2px_5px_rgba(0,0,0,0.05)]"
                   data-testid="input-password"
                   placeholder="Ingresa tu contraseña"
+                  //al input de password le ponemos el estado password por defecto
                   value={password}
+                  //al estado de password le pasamos lo que el usuario escriba en el input
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
